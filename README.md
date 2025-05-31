@@ -5,12 +5,20 @@ This is an implementation of the paper "Personalized Variable Selection". This m
 Here, I gave an example of simulating data in the paper.
 For regression,
 ```
-run MRF_imputation_step_reg(y_name,block_1_names,imp_names,train_df,test_df,full_tree_size,red_tree_size,total_trees=1000)
+run data=simulate_data_reg(n=18000, train_n=9000, test_n=9000,p=100,groups=6)
+MRF_imputation_step_reg(y_name='Y',block_1_names=colnames(data$train_df)[1:5],
+                                        imp_names=colnames(data$train_df)[6:100],train_df=data$train_df,test_df=data$test_df,
+                                        full_tree_size=10,red_tree_size=30,total_trees=1000)
+
 ```
 For classification,
 ```
-run MRF_imputation_step_cls(y_name,block_1_names,imp_names,train_df,test_df,valid_df,groups=6,
-full_tree_size,red_tree_size,total_trees=1000)
+run data=simulate_data_cls(n=18000, train_n=8000, test_n=9000,p=100,groups=6)
+MRF_imputation_step_cls(y_name='label',block_1_names=colnames(data$train_df)[1:5],
+                                        imp_names=colnames(data$train_df)[6:100],train_df=data$train_df,
+                                        test_df=data$test_df,valid_df=data$valid_df,groups=6,
+                                        full_tree_size=10,red_tree_size=30,total_trees=1000)
+
 ```
 Note: 
 1. y_name is the name of response variable
