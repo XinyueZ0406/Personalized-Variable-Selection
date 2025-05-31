@@ -40,7 +40,8 @@ calculate_entropy <- function(prob_matrix) {
   return(-sum(prob_matrix * log(prob_matrix)))
 }
 
-compute_ELIE_ave_cls <- function(total_trees,mrf_model,test_df,rf_model,groups,y_valid,pred_valid,block_1_names,imp_names) {
+compute_ELIE_ave_cls <- function(mrf_model,test_df,rf_model,groups,y_valid,pred_valid,block_1_names,imp_names) {
+  total_trees <- mrf_model$ntree
   predicted_y_test_true_cal_imp <- array(NA, dim = c(total_trees, nrow(test_df), groups))
   for (imputation_idx in 1:total_trees) {
     pred_mrf <- predict.rfsrc(mrf_model, get.tree = imputation_idx, test_df[,block_1_names])
@@ -67,10 +68,12 @@ compute_ELIE_ave_cls <- function(total_trees,mrf_model,test_df,rf_model,groups,y
   return(ELIE)
 }
 
-compute_ELIE_nns_cls <- function(total_trees,mrf_model,test_df,train_df,rf_model,groups,y_valid,pred_valid,block_1_names,imp_names) {
+compute_ELIE_nns_cls <- function(mrf_model,test_df,train_df,rf_model,groups,y_valid,pred_valid,block_1_names,imp_names) {
+  total_trees <- mrf_model$ntree
   predicted_y_test_true_cal_imp <- array(NA, dim = c(total_trees, nrow(test_df), groups))
   train_nodes <- mrf_model$membership
   test_nodes <- predict(mrf_model, newdata = test_df[,block_1_names], membership = TRUE)$membership
+  
   for (j in 1:total_trees) {
     new_test_x2<- list()
     for (i in 1:nrow(test_df)) {
@@ -103,7 +106,7 @@ compute_ELIE_nns_cls <- function(total_trees,mrf_model,test_df,train_df,rf_model
 
 
 MRF_imputation_step_cls <- function(y_name,block_1_names,imp_names,train_df,test_df,valid_df,groups,
-                                    full_tree_size=10,red_tree_size=30,total_trees=1000){
+                                    full_tree_size=10,red_tree_size=30,total_trees){
   # train full model with X and Z
   rf_model <- randomForest(train_df[,y_name] ~ ., data=train_df[, names(train_df) != y_name], ntree=full_tree_size)
   predicted_y_test_true=predict(rf_model, test_df,type = "prob")
@@ -128,16 +131,21 @@ MRF_imputation_step_cls <- function(y_name,block_1_names,imp_names,train_df,test
     log(prob_row[true_class])
   }, split(predicted_y_test_true_cal_5, seq(nrow(predicted_y_test_true_cal_5))), test_df[,y_name])
   log_probs_5=as.numeric(log_probs_5)
+  print(1)
   #mrf
   lhs <- paste(imp_names, sep = "", collapse = ", ")
   rhs <- paste(block_1_names, sep = "", collapse = " + ")
   formula_str <- paste("Multivar(", lhs, ") ~ ", rhs)
   formula_obj <- as.formula(formula_str)
   mrf_model=rfsrc(formula_obj,  ntree = total_trees,membership = TRUE,forest=TRUE,data =train_df)
-  ELIE_ave=compute_ELIE_ave_cls(total_trees,mrf_model,test_df,rf_model,groups,y_valid=valid_df[,y_name],
-                                pred_valid=predicted_y_valid_true,block_1_names,imp_names)
-  ELIE_nns=compute_ELIE_nns_cls(total_trees,mrf_model,test_df,rf_model,groups,y_valid=valid_df[,y_name],
-                                pred_valid=predicted_y_valid_true,block_1_names,imp_names)
+  print(2)
+  ELIE_ave=compute_ELIE_ave_cls(mrf_model=mrf_model,test_df=test_df,rf_model=rf_model,
+                                groups=groups,y_valid=valid_df[,y_name],
+                                pred_valid=predicted_y_valid_true,block_1_names=block_1_names,
+                                imp_names=imp_names)
+  ELIE_nns=compute_ELIE_nns_cls(mrf_model=mrf_model,test_df=test_df,train_df=train_df,rf_model=rf_model,
+                                groups=groups,y_valid=valid_df[,y_name],
+                                pred_valid=predicted_y_valid_true,block_1_names=block_1_names,imp_names=imp_names)
   
   return(list("ELIE_ave"=ELIE_ave,
               "ELIE_nns"=ELIE_nns,

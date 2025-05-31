@@ -9,6 +9,7 @@ library(mclust)
 
 compute_ELIE_ave_reg <- function(total_trees,mrf_model,test_df,rf_model,block_1_names,imp_names){
   pred_test_list = list()
+  total_trees <- mrf_model$ntree
   for (imputation_idx in 1:total_trees) {
     pred_mrf <- predict.rfsrc(mrf_model, get.tree = imputation_idx, test_df[,block_1_names])
     pred_list <- lapply(imp_names, function(feature) {
@@ -26,6 +27,7 @@ compute_ELIE_ave_reg <- function(total_trees,mrf_model,test_df,rf_model,block_1_
 
 compute_ELIE_nns_reg <- function(total_trees,mrf_model,test_df,train_df,rf_model,block_1_names,imp_names){
   pred_test_list = list()
+  total_trees <- mrf_model$ntree
   train_nodes <- mrf_model$membership
   test_nodes <- predict(mrf_model, newdata = test_df[,block_1_names], membership = TRUE)$membership
   for (j in 1:total_trees) {
@@ -67,8 +69,12 @@ MRF_imputation_step_reg <- function(y_name,block_1_names,imp_names,train_df,test
   formula_str <- paste("Multivar(", lhs, ") ~ ", rhs)
   formula_obj <- as.formula(formula_str)
   mrf_model=rfsrc(formula_obj,  ntree = total_trees,membership = TRUE,forest=TRUE,data =train_df)
-  ELIE_ave=compute_ELIE_ave_reg(total_trees,mrf_model,test_df,rf_model,block_1_names,imp_names)
-  ELIE_nns=compute_ELIE_nns_reg(total_trees,mrf_model,test_df,rf_model,block_1_names,imp_names)
+  ELIE_ave=compute_ELIE_ave_reg(total_trees=total_trees,mrf_model=mrf_model,
+                                test_df=test_df,rf_model=rf_model,
+                                block_1_names=block_1_names,imp_names=imp_names)
+  ELIE_nns=compute_ELIE_nns_reg(total_trees=total_trees,mrf_model=mrf_model,
+                                test_df=test_df,train_df=train_df,rf_model=rf_model,
+                                block_1_names=block_1_names,imp_names=imp_names)
   
   return(list("ELIE_ave"=ELIE_ave,
               "ELIE_nns"=ELIE_nns,
