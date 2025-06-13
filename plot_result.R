@@ -44,7 +44,7 @@ ELIE_result_cls=MRF_imputation_step_cls(y_name='label',block_1_names=colnames(da
 data=simulate_data_reg(n=18000, train_n=9000, test_n=9000,p=100,groups=6)
 ELIE_result_reg=MRF_imputation_step_reg(y_name='Y',block_1_names=colnames(data$train_df)[1:5],
                                         imp_names=colnames(data$train_df)[6:100],train_df=data$train_df,test_df=data$test_df,
-                                        full_tree_size=10,red_tree_size=30,total_trees=100)
+                                        full_tree_size=10,red_tree_size=30,total_trees=1000)
 
 
 # use regression example to show the results in the paper
