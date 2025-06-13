@@ -73,7 +73,7 @@ plot_combined <- bind_rows(plot_result_ave,plot_result_nns)
 ggplot(plot_combined , aes(x =cumsum_ELIE , y = total_loss,color = Method)) +
   geom_line(size = 1.2)+
   labs(x = "Cumulative Sum of ELIE_ave", y = "Sum of Squared Error")+
-  geom_abline(slope = -1, intercept =sum(ELIE_result_reg$squared_error_5), color = "black", linetype = "dashed")
+  geom_abline(slope = -1, intercept =sum(ELIE_result_reg$squared_errors_5), color = "black", linetype = "dashed")
 
 # MSE vs percentage of observation with Z measured
 ggplot(plot_combined , aes(x =percent , y = total_loss/nrow(data$test_df),color = Method)) +
