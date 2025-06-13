@@ -41,13 +41,14 @@ ELIE_result_cls=MRF_imputation_step_cls(y_name='label',block_1_names=colnames(da
                                         test_df=data$test_df,valid_df=data$valid_df,groups=6,
                                         full_tree_size=10,red_tree_size=30,total_trees=1000)
 
+# use regression example to show the results in the paper
 data=simulate_data_reg(n=18000, train_n=9000, test_n=9000,p=100,groups=6)
 ELIE_result_reg=MRF_imputation_step_reg(y_name='Y',block_1_names=colnames(data$train_df)[1:5],
                                         imp_names=colnames(data$train_df)[6:100],train_df=data$train_df,test_df=data$test_df,
                                         full_tree_size=10,red_tree_size=30,total_trees=1000)
 
 
-# use regression example to show the results in the paper
+
 #Histogram of ELIE
 ELIE_result_reg=data.frame(ELIE_result_reg)
 ggplot(data=ELIE_result_reg,aes(x=ELIE_ave))+
@@ -58,11 +59,10 @@ ggplot(data=ELIE_result_reg,aes(x=ELIE_nns))+
   geom_histogram(fill = "blue", color = "black", alpha = 0.7)+
   labs(x = "ELIE_nns")
 
-#also can do plots for ELIE_nns
-df=data.frame(ELIE=ELIE_result_reg$ELIE_ave,loss_full=ELIE_result_reg$log_probs_full,loss_5=ELIE_result_reg$log_probs_5)
+df=data.frame(ELIE=ELIE_result_reg$ELIE_ave,loss_full=ELIE_result_reg$squared_errors_full,loss_5=ELIE_result_reg$squared_errors_5)
 plot_result_ave=compute_curve(df)
 plot_result_ave$percent=seq(0,100,1)
-df=data.frame(ELIE=ELIE_result_reg$ELIE_nns,loss_full=ELIE_result_reg$log_probs_full,loss_5=ELIE_result_reg$log_probs_5)
+df=data.frame(ELIE=ELIE_result_reg$ELIE_nns,loss_full=ELIE_result_reg$squared_errors_full,loss_5=ELIE_result_reg$squared_errors_5)
 plot_result_nns=compute_curve(df)
 plot_result_nns$percent=seq(0,100,1)
 plot_result_ave$Method <- "average"
